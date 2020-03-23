@@ -1,0 +1,82 @@
+package Jagdpanther2;
+import robocode.*;
+import java.awt.geom.*;
+//import java.awt.Color;
+
+// API help : https://robocode.sourceforge.io/docs/robocode/robocode/Robot.html
+
+/**
+ * HitlersJagdpanther2 - a robot by (your name here)
+ */
+public class HitlersJagdpanther2 extends Robot
+{
+
+	static Point2D.Double[] enemyPoints = new Point2D.Double[5];
+	int count; 
+	/**
+	 * run: HitlersJagdpanther2's default behavior
+	 */
+	public void run() {
+		// Initialization of the robot should be put here
+
+		// After trying out your robot, try uncommenting the import at the top,
+		// and the next line:
+
+		// setColors(Color.red,Color.blue,Color.green); // body,gun,radar
+
+		// Robot main loop
+		while(true) {
+			// Replace the next 4 lines with any behavior you would like
+	
+		}
+	}
+
+	/**
+	 * onScannedRobot: What to do when you see another robot
+	 */
+	public void onScannedRobot(ScannedRobotEvent e) {
+		// Replace the next line with any behavior you would like
+		double absBearing = e.getBearingRadians() + getHeadingRadians();
+		enemyPoints[count]=new Point2D.Double(getX()+e.getDistance()*Math.sin(absBearing),getY()+e.getDistance()*Math.cos(absBearing));
+		if(++count>=getOthers()){
+   			 count=0;
+		}
+		
+		double xForce=0, yForce= 0;
+		for(int i=0;i<getOthers() && enemyPoints[i] != null;i++){
+   			double absBearing=Utils.normalAbsoluteAngle(Math.atan2(enemyPoints[i].x-getX(),enemyPoints[i].y-getY()));
+    		double distance=enemyPoints[i].distance(getX(),getY());
+    		xForce -= Math.sin(absBearing) / (distance * distance);
+    		yForce -= Math.cos(absBearing) / (distance * distance);
+		}
+		double angle = Math.atan2(xForce, yForce);
+		
+		if (xForce == 0 && yForce == 0) {
+   		 // If no force, do nothing
+		} else if(Math.abs(angle-getHeadingRadians())<Math.PI/2){
+    		setTurnRightRadians(Utils.normalRelativeAngle(angle-getHeadingRadians()));
+    		setAhead(Double.POSITIVE_INFINITY);
+		} else {
+  			  setTurnRightRadians(Utils.normalRelativeAngle(angle+Math.PI-getHeadingRadians()));
+  			  setAhead(Double.NEGATIVE_INFINITY);
+			 
+
+		}
+  }
+
+	/**
+	 * onHitByBullet: What to do when you're hit by a bullet
+	 */
+	public void onHitByBullet(HitByBulletEvent e) {
+		// Replace the next line with any behavior you would like
+		back(10);
+	}
+	
+	/**
+	 * onHitWall: What to do when you hit a wall
+	 */
+	public void onHitWall(HitWallEvent e) {
+		// Replace the next line with any behavior you would like
+		back(20);
+	}	
+}
