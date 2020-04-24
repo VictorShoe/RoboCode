@@ -1,0 +1,92 @@
+
+package DumE2;
+
+
+import robocode.Robot;
+import robocode.ScannedRobotEvent;
+import robocode.WinEvent;
+import robocode.HitRobotEvent;
+
+import java.awt.*;
+
+
+
+public class DumE2 extends Robot {
+
+public static double normalRelativeAngleDegrees(double angle) {
+		return (angle %= 360) >= 0 ? (angle < 180) ? angle : angle - 360 : (angle >= -180) ? angle : angle + 360;
+	}
+
+	public void run() {
+		
+		setBodyColor(Color.black);
+		setGunColor(Color.black);
+		setRadarColor(Color.black);
+		setScanColor(Color.black);
+		setBulletColor(Color.black);
+
+	
+		double moveAmount = Math.max(getBattleFieldWidth(), getBattleFieldHeight());
+		
+		boolean peek = false;
+
+	
+		turnLeft(getHeading() % 90);
+		ahead(moveAmount);
+	
+		peek = true;
+		turnGunRight(90);
+		turnRight(90);
+		
+		while (true) {
+		
+			peek = true;
+		
+			ahead(moveAmount);
+			
+			peek = false;
+		
+			turnRight(90);
+		}
+	}
+
+	
+	public void onScannedRobot(ScannedRobotEvent e) {
+	
+		double absoluteBearing = getHeading() + e.getBearing();
+		double bearingFromGun = normalRelativeAngleDegrees(absoluteBearing - getGunHeading());
+
+	
+		if (Math.abs(bearingFromGun) <= 3) {
+			turnGunRight(bearingFromGun);
+		
+			if (getGunHeat() == 0) {
+				fire(Math.min(3 - Math.abs(bearingFromGun), getEnergy() - .1));
+			}
+		}
+		else {
+			turnGunRight(bearingFromGun);
+		}
+		
+		if (bearingFromGun == 0) {
+			scan();
+			fire(2);
+			boolean peek = false;
+			if (peek) {
+			scan();
+			}
+		}
+	}
+public void onHitRobot(HitRobotEvent e) {
+	
+		if (e.getBearing() > -90 && e.getBearing() < 90) {
+			back(100);
+		} else {
+			ahead(100);
+		}
+	}
+	public void onWin(WinEvent e) {
+	
+		turnRight(36000);
+	}
+}	
